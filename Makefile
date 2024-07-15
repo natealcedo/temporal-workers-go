@@ -5,6 +5,7 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME=myapp
+TEMPORAL_GRPC_ENDPOINT=localhost:7233
 
 # Default command when you run just `make`
 all: test build
@@ -24,7 +25,7 @@ clean:
 
 # Run the project (assumes the binary is already built)
 run:
-	$(GOCMD) run main.go
+	TEMPORAL_GRPC_ENDPOINT=$(TEMPORAL_GRPC_ENDPOINT) $(GOCMD) run main.go
 
 # Fetch dependencies
 deps:

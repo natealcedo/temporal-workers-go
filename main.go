@@ -6,11 +6,15 @@ import (
 	"log"
 	"natealcedo/temporal-workers/go/nate_activity"
 	"natealcedo/temporal-workers/go/nate_workflow"
+	"os"
 )
 
 func main() {
 	// Create a new client to connect to your Temporal server
-	c, err := client.Dial(client.Options{})
+	temporalAddress := os.Getenv("TEMPORAL_GRPC_ENDPOINT")
+	c, err := client.Dial(client.Options{
+		HostPort: temporalAddress,
+	})
 	if err != nil {
 		log.Fatalln("Unable to create Temporal client:", err)
 	}
