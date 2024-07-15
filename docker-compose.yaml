@@ -1,0 +1,53 @@
+services:
+  temporal:
+    image: temporalio/auto-setup:1.15.1
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=temporal-postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+    ports:
+      - "7233:7233" # Temporal gRPC port
+    networks:
+      - temporal-network
+    depends_on:
+      - temporal-postgresql
+
+  temporal-postgresql:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    networks:
+      - temporal-network
+
+  temporal-web:
+    image: temporalio/web:1.15.0
+    restart: always
+    environment:
+      - TEMPORAL_GRPC_ENDPOINT=temporal:7233
+      - TEMPORAL_PERMIT_WRITE_API=true
+    ports:
+      - "8089:8088"
+    depends_on:
+      - temporal
+    networks:
+      - temporal-network
+
+  go-workers:
+    build: .
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_GRPC_ENDPOINT=temporal:7233
+    networks:
+      - temporal-network
+    deploy:
+      replicas: 2
+
+networks:
+  temporal-network:
+    driver: bridge
